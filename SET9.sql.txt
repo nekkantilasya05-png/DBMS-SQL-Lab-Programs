@@ -1,0 +1,69 @@
+USE UniversityDB;
+
+-- ==========================================
+-- SET 9
+-- a) Number of students in each department
+-- b) DELETE specified employee
+-- c) GROUP BY and HAVING
+-- d) UNION, INTERSECTION, DIFFERENCE
+-- ==========================================
+
+-- a) COUNT STUDENTS IN EACH DEPARTMENT
+
+SELECT
+    d.dept_id,
+    d.dept_name,
+    COUNT(s.student_id) AS Student_Count
+FROM Department d
+LEFT JOIN Student s
+ON d.dept_id = s.dept_id
+GROUP BY d.dept_id, d.dept_name;
+
+-- b) DELETE SPECIFIED EMPLOYEE
+
+DELETE FROM Employee
+WHERE emp_id = 106;
+
+SELECT * FROM Employee;
+
+-- c) GROUP BY AND HAVING
+
+SELECT
+    department,
+    COUNT(*) AS Employee_Count,
+    AVG(salary) AS Average_Salary,
+    SUM(salary) AS Total_Salary
+FROM Employee
+GROUP BY department
+HAVING COUNT(*) >= 1
+AND AVG(salary) > 50000;
+
+-- d) SET OPERATIONS
+
+-- UNION
+SELECT city
+FROM Employee
+WHERE department = 'IT'
+UNION
+SELECT city
+FROM Employee
+WHERE department = 'Finance';
+
+-- INTERSECTION
+SELECT city
+FROM Employee
+WHERE department = 'IT'
+INTERSECT
+SELECT city
+FROM Employee
+WHERE department = 'Finance';
+
+-- DIFFERENCE
+SELECT city
+FROM Employee
+WHERE department = 'IT'
+AND city NOT IN (
+    SELECT city
+    FROM Employee
+    WHERE department = 'Finance'
+);

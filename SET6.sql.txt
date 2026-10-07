@@ -1,0 +1,79 @@
+USE UniversityDB;
+
+-- ==========================================
+-- SET 6
+-- a) Employees in Finance and IT using nested queries
+-- b) Materialized View
+-- c) Instructors teaching a specific course
+-- d) COMMIT, SAVEPOINT, ROLLBACK
+-- ==========================================
+
+-- a) EMPLOYEES IN FINANCE AND IT
+-- Using nested query
+
+SELECT *
+FROM Employee
+WHERE department IN (
+    SELECT department
+    FROM Employee
+    WHERE department IN ('Finance', 'IT')
+);
+
+-- b) MATERIALIZED VIEW SIMULATION
+
+DROP TABLE IF EXISTS Course_MV;
+
+CREATE TABLE Course_MV AS
+SELECT
+    c.course_id,
+    c.course_name,
+    f.faculty_name
+FROM Course c
+JOIN Faculty f
+ON c.faculty_id = f.faculty_id;
+
+SELECT * FROM Course_MV;
+
+-- Refresh materialized view
+
+TRUNCATE TABLE Course_MV;
+
+INSERT INTO Course_MV
+SELECT
+    c.course_id,
+    c.course_name,
+    f.faculty_name
+FROM Course c
+JOIN Faculty f
+ON c.faculty_id = f.faculty_id;
+
+-- c) INSTRUCTORS TEACHING DBMS
+
+SELECT
+    f.faculty_id,
+    f.faculty_name,
+    c.course_name
+FROM Faculty f
+JOIN Course c
+ON f.faculty_id = c.faculty_id
+WHERE c.course_name = 'DBMS';
+
+-- d) TCL
+
+START TRANSACTION;
+
+UPDATE Employee
+SET salary = salary + 3000
+WHERE emp_id = 101;
+
+SAVEPOINT first_update;
+
+UPDATE Employee
+SET city = 'Hyderabad'
+WHERE emp_id = 102;
+
+ROLLBACK TO SAVEPOINT first_update;
+
+COMMIT;
+
+SELECT * FROM Employee;

@@ -1,0 +1,177 @@
+-- ==========================================
+-- SET 1
+-- a) University Database Schema
+-- b) INSERT, SELECT, UPDATE, DELETE
+-- c) Date/time and Aggregate Functions
+-- d) Join Operations
+-- ==========================================
+
+CREATE DATABASE IF NOT EXISTS UniversityDB;
+USE UniversityDB;
+
+-- ------------------------------
+-- a) CREATE TABLES
+-- ------------------------------
+
+CREATE TABLE IF NOT EXISTS Department (
+    dept_id INT PRIMARY KEY,
+    dept_name VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS Faculty (
+    faculty_id INT PRIMARY KEY,
+    faculty_name VARCHAR(50),
+    dept_id INT,
+    FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+CREATE TABLE IF NOT EXISTS Student (
+    student_id INT PRIMARY KEY,
+    student_name VARCHAR(50),
+    dept_id INT,
+    city VARCHAR(50),
+    FOREIGN KEY (dept_id) REFERENCES Department(dept_id)
+);
+
+CREATE TABLE IF NOT EXISTS Course (
+    course_id INT PRIMARY KEY,
+    course_name VARCHAR(50),
+    faculty_id INT,
+    FOREIGN KEY (faculty_id) REFERENCES Faculty(faculty_id)
+);
+
+CREATE TABLE IF NOT EXISTS Enrollment (
+    enroll_id INT PRIMARY KEY,
+    student_id INT,
+    course_id INT,
+    grade VARCHAR(5),
+    FOREIGN KEY (student_id) REFERENCES Student(student_id),
+    FOREIGN KEY (course_id) REFERENCES Course(course_id)
+);
+
+CREATE TABLE IF NOT EXISTS Employee (
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR(50),
+    department VARCHAR(50),
+    salary DECIMAL(10,2),
+    city VARCHAR(50),
+    joining_date DATE
+);
+
+-- ------------------------------
+-- INSERT SAMPLE DATA
+-- ------------------------------
+
+INSERT IGNORE INTO Department VALUES
+(1, 'CSE'),
+(2, 'AIML'),
+(3, 'ECE'),
+(4, 'IT'),
+(5, 'Mechanical');
+
+INSERT IGNORE INTO Faculty VALUES
+(101, 'Dr. Rao', 1),
+(102, 'Dr. Priya', 2),
+(103, 'Dr. Kumar', 3),
+(104, 'Dr. Anitha', 4);
+
+INSERT IGNORE INTO Student VALUES
+(1, 'Lasya', 2, 'Rajahmundry'),
+(2, 'Anu', 1, 'Hyderabad'),
+(3, 'Rahul', 2, 'Vijayawada'),
+(4, 'Sneha', 3, 'Chennai'),
+(5, 'Kiran', 4, 'Vizag');
+
+INSERT IGNORE INTO Course VALUES
+(201, 'DBMS', 101),
+(202, 'Machine Learning', 102),
+(203, 'Computer Networks', 103),
+(204, 'Web Technology', 104);
+
+INSERT IGNORE INTO Enrollment VALUES
+(1, 1, 202, 'A'),
+(2, 1, 201, 'A+'),
+(3, 2, 201, 'B+'),
+(4, 3, 202, 'A'),
+(5, 4, 203, 'B'),
+(6, 5, 204, 'A');
+
+INSERT IGNORE INTO Employee VALUES
+(101, 'David', 'Finance', 65000, 'Hyderabad', '2022-01-15'),
+(102, 'John', 'IT', 70000, 'Chennai', '2021-06-20'),
+(103, 'Ravi', 'HR', 45000, 'Vijayawada', '2023-03-10'),
+(104, 'Anitha', 'Finance', 55000, 'Delhi', '2022-08-12'),
+(105, 'Priya', 'IT', 60000, 'Mumbai', '2024-01-25'),
+(106, 'Kiran', 'Marketing', 50000, 'Bangalore', '2023-11-05');
+
+-- ------------------------------
+-- b) CRUD OPERATIONS
+-- ------------------------------
+
+-- INSERT
+INSERT INTO Employee
+VALUES (107, 'Arjun', 'IT', 58000, 'Pune', '2025-02-15');
+
+-- SELECT
+SELECT * FROM Employee;
+
+-- UPDATE
+UPDATE Employee
+SET salary = 62000
+WHERE emp_id = 107;
+
+-- DELETE
+DELETE FROM Employee
+WHERE emp_id = 107;
+
+-- ------------------------------
+-- c) DATE/TIME & AGGREGATE FUNCTIONS
+-- ------------------------------
+
+SELECT 
+    emp_name,
+    joining_date,
+    YEAR(joining_date) AS Joining_Year,
+    MONTH(joining_date) AS Joining_Month,
+    DATEDIFF(CURDATE(), joining_date) AS Days_Worked
+FROM Employee;
+
+SELECT
+    COUNT(*) AS Total_Employees,
+    SUM(salary) AS Total_Salary,
+    AVG(salary) AS Average_Salary,
+    MAX(salary) AS Highest_Salary,
+    MIN(salary) AS Lowest_Salary
+FROM Employee;
+
+-- ------------------------------
+-- d) JOIN OPERATIONS
+-- ------------------------------
+
+-- INNER JOIN
+SELECT s.student_name, d.dept_name
+FROM Student s
+INNER JOIN Department d
+ON s.dept_id = d.dept_id;
+
+-- EQUI JOIN
+SELECT s.student_name, d.dept_name
+FROM Student s, Department d
+WHERE s.dept_id = d.dept_id;
+
+-- NATURAL JOIN
+SELECT *
+FROM Student
+NATURAL JOIN Department;
+
+-- LEFT OUTER JOIN
+SELECT d.dept_name, s.student_name
+FROM Department d
+LEFT JOIN Student s
+ON d.dept_id = s.dept_id;
+
+-- RIGHT OUTER JOIN
+SELECT d.dept_name, s.student_name
+FROM Department d
+RIGHT JOIN Student s
+ON d.dept_id = s.dept_id;

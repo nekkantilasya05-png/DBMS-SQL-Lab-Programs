@@ -1,0 +1,69 @@
+USE UniversityDB;
+
+-- ==========================================
+-- SET 3
+-- a) Students of specified department
+-- b) Insert six employees and display
+-- c) SUM, AVG, MIN, MAX, COUNT with GROUP BY/HAVING
+-- d) UNION, INTERSECTION, DIFFERENCE
+-- ==========================================
+
+-- a) STUDENTS BELONGING TO AIML DEPARTMENT
+
+SELECT s.student_id, s.student_name
+FROM Student s
+JOIN Department d
+ON s.dept_id = d.dept_id
+WHERE d.dept_name = 'AIML';
+
+-- b) INSERT SIX EMPLOYEE RECORDS
+
+INSERT IGNORE INTO Employee VALUES
+(201, 'Akhil', 'IT', 62000, 'Hyderabad', '2023-01-10'),
+(202, 'Bhanu', 'Finance', 58000, 'Delhi', '2022-04-12'),
+(203, 'Charan', 'HR', 48000, 'Chennai', '2023-07-15'),
+(204, 'Divya', 'IT', 72000, 'Mumbai', '2021-09-20'),
+(205, 'Esha', 'Finance', 67000, 'Pune', '2022-12-01'),
+(206, 'Farhan', 'Marketing', 52000, 'Bangalore', '2024-02-18');
+
+SELECT * FROM Employee;
+
+-- c) AGGREGATE FUNCTIONS
+
+SELECT
+    department,
+    SUM(salary) AS Total_Salary,
+    AVG(salary) AS Average_Salary,
+    MIN(salary) AS Minimum_Salary,
+    MAX(salary) AS Maximum_Salary,
+    COUNT(*) AS Employee_Count
+FROM Employee
+GROUP BY department
+HAVING AVG(salary) > 50000;
+
+-- d) SET OPERATIONS
+
+-- UNION
+SELECT city FROM Employee
+WHERE department = 'IT'
+UNION
+SELECT city FROM Employee
+WHERE department = 'Finance';
+
+-- INTERSECTION
+SELECT city FROM Employee
+WHERE department = 'IT'
+INTERSECT
+SELECT city FROM Employee
+WHERE department = 'Finance';
+
+-- DIFFERENCE
+-- MySQL alternative for EXCEPT/MINUS
+SELECT city
+FROM Employee
+WHERE department = 'IT'
+AND city NOT IN (
+    SELECT city
+    FROM Employee
+    WHERE department = 'Finance'
+);

@@ -1,0 +1,97 @@
+USE UniversityDB;
+
+-- ==========================================
+-- SET 10
+-- a) Departments having employee salary > 60000
+-- b) Materialized View
+-- c) Students not enrolled in any course
+-- d) COMMIT and ROLLBACK
+-- ==========================================
+
+-- a) USING EXISTS
+
+SELECT d.*
+FROM Department d
+WHERE EXISTS (
+    SELECT 1
+    FROM Employee e
+    WHERE e.department = d.dept_name
+    AND e.salary > 60000
+);
+
+-- b) MATERIALIZED VIEW SIMULATION
+
+DROP TABLE IF EXISTS Department_Salary_MV;
+
+CREATE TABLE Department_Salary_MV AS
+SELECT
+    department,
+    COUNT(*) AS Employee_Count,
+    AVG(salary) AS Average_Salary,
+    MAX(salary) AS Maximum_Salary
+FROM Employee
+GROUP BY department;
+
+SELECT * FROM Department_Salary_MV;
+
+-- Refresh Materialized View
+
+TRUNCATE TABLE Department_Salary_MV;
+
+INSERT INTO Department_Salary_MV
+SELECT
+    department,
+    COUNT(*),
+    AVG(salary),
+    MAX(salary)
+FROM Employee
+GROUP BY department;
+
+SELECT * FROM Department_Salary_MV;
+
+-- c) STUDENTS NOT ENROLLED IN ANY COURSE
+
+SELECT
+    s.student_id,
+    s.student_name
+FROM Student s
+LEFT JOIN Enrollment e
+ON s.student_id = e.student_id
+WHERE e.student_id IS NULL;
+
+-- Alternative using NOT EXISTS
+
+SELECT *
+FROM Student s
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Enrollment e
+    WHERE e.student_id = s.student_id
+);
+
+-- d) COMMIT AND ROLLBACK
+
+START TRANSACTION;
+
+UPDATE Employee
+SET salary = salary + 5000
+WHERE emp_id = 101;
+
+SELECT * FROM Employee
+WHERE emp_id = 101;
+
+ROLLBACK;
+
+SELECT * FROM Employee
+WHERE emp_id = 101;
+
+START TRANSACTION;
+
+UPDATE Employee
+SET salary = salary + 2000
+WHERE emp_id = 102;
+
+COMMIT;
+
+SELECT * FROM Employee
+WHERE emp_id = 102;

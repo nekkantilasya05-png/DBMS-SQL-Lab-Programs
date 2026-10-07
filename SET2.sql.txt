@@ -1,0 +1,84 @@
+USE UniversityDB;
+
+-- ==========================================
+-- SET 2
+-- a) Correlated and Nested Subqueries
+-- b) View and Materialized View
+-- c) Students and their Majors
+-- d) GRANT, REVOKE, COMMIT, SAVEPOINT, ROLLBACK
+-- ==========================================
+
+-- a) NESTED QUERY
+SELECT *
+FROM Employee
+WHERE salary > (
+    SELECT AVG(salary)
+    FROM Employee
+);
+
+-- CORRELATED SUBQUERY
+SELECT e1.*
+FROM Employee e1
+WHERE salary > (
+    SELECT AVG(e2.salary)
+    FROM Employee e2
+    WHERE e2.department = e1.department
+);
+
+-- b) NORMAL VIEW
+CREATE OR REPLACE VIEW Employee_View AS
+SELECT emp_id, emp_name, department, salary
+FROM Employee;
+
+SELECT * FROM Employee_View;
+
+-- MATERIALIZED VIEW SIMULATION
+DROP TABLE IF EXISTS Employee_MV;
+
+CREATE TABLE Employee_MV AS
+SELECT department,
+       COUNT(*) AS employee_count,
+       AVG(salary) AS average_salary
+FROM Employee
+GROUP BY department;
+
+SELECT * FROM Employee_MV;
+
+-- Refresh materialized view
+TRUNCATE TABLE Employee_MV;
+
+INSERT INTO Employee_MV
+SELECT department,
+       COUNT(*),
+       AVG(salary)
+FROM Employee
+GROUP BY department;
+
+-- c) STUDENTS AND THEIR MAJORS
+SELECT
+    s.student_id,
+    s.student_name,
+    d.dept_name AS Major
+FROM Student s
+JOIN Department d
+ON s.dept_id = d.dept_id;
+
+-- d) TCL COMMANDS
+
+START TRANSACTION;
+
+UPDATE Employee
+SET salary = salary + 2000
+WHERE department = 'IT';
+
+SAVEPOINT salary_update;
+
+UPDATE Employee
+SET salary = salary + 1000
+WHERE department = 'Finance';
+
+ROLLBACK TO SAVEPOINT salary_update;
+
+COMMIT;
+
+SELECT * FROM Employee;
